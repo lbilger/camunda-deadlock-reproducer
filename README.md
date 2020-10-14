@@ -30,10 +30,14 @@ Now you can:
 - start 1000 new processes:
   ```bash
   for i in {1..1000}; do echo -n "$i "; curl -X POST localhost:8082/public/process-rest/simple-process/start; done
+  # or using parallel
+  parallel -l 1 -j 10 'echo -n "{} "; curl -s -X POST localhost:8082/public/process-rest/simple-process/start' ::: {1..1000}
   ```
 - complete all tasks:
   ```bash
   curl localhost:8082/rest/task | jq -r '.[].id' | while read taskId; do curl -X POST "localhost:8082/public/process-rest/simple-process/task/$taskId/complete"; done
+  # or using parallel
+  curl localhost:8082/rest/task | jq -r '.[].id' | parallel -l 1 -j 10 'echo -n "{#} "; curl -s -X POST "localhost:8082/public/process-rest/simple-process/task/{}/complete"'
   ```
 - start a batch to delete all historic process instances:
   ```bash
